@@ -7,7 +7,7 @@ from app.constants import (
     default_timeout_env,
     default_timeout_value,
 )
-from app.web import load
+from app.web import info, load
 
 
 def create_app() -> Flask:
@@ -16,6 +16,7 @@ def create_app() -> Flask:
         default_timeout_env, default_timeout_value
     )
 
+    app.register_blueprint(info.bp)
     app.register_blueprint(load.bp)
 
     return app
