@@ -9,7 +9,7 @@
 Пример использования: /load?timeout=300 - нагружает все ядра ноды на 5 минут.
 
 
-## Инструкция по деплою приложения.
+## Инструкция по деплою приложения и подготовке шаблона запуска.
 
 1. В консоль управления облаком импортировать публичный SSH-ключ, если это не было сделано раньше.
 2. В группах безопасности открыть входящие TCP порты как минимум: 22, 5000
@@ -28,24 +28,21 @@ Elastic IP: выбрать автоматически
 11. Создать виртуальное окружение командой: python3 -m venv .venv
 12. Активировать виртуальное окружение командой: . .venv/bin/activate
 13. Установить зависимости командой: pip install -r requirements.txt
-14. Скопировать файл template.uwsgi.ini в текущий каталог с новым именем uwsgi.ini: cp template.uwsgi.ini uwsgi.ini
-15. Отредактировать файл uwsgi.ini поменяв в параметре chdir подстроку %APP_DIR% на /home/ec2-user/dev/croc/start_task_cpu_bound_app
-16. Скопировать файл template.uwsgi.service в текущий каталог с новым именем uwsgi.service: cp template.uwsgi.service uwsgi.service
-17. Отредактировать файл uwsgi.service поменяв в параметре ExecStart подстроку %UWSGI_PATH% на /home/ec2-user/dev/croc/start_task_cpu_bound_app/.venv/bin/uwsgi
+14. Скопировать файл template.gunicorn.service в текущий каталог с новым именем gunicorn.service: cp template.gunicorn.service gunicorn.service
+15. Отредактировать файл gunicorn.service поменяв в параметре ExecStart подстроку %UWSGI_PATH% на /home/ec2-user/dev/croc/start_task_cpu_bound_app/.venv/bin/gunicorn
 и подстроку %APP_DIR% на /home/ec2-user/dev/croc/start_task_cpu_bound_app
-Общий вид параметра ExecStart должен получиться:
-ExecStart=/home/ec2-user/dev/croc/start_task_cpu_bound_app/.venv/bin/uwsgi --ini /home/ec2-user/dev/croc/start_task_cpu_bound_app/uwsgi.ini
-18. Добавить службу в systemd командой: sudo ln -s /home/ec2-user/dev/croc/start_task_cpu_bound_app/uwsgi.service /etc/systemd/system/uwsgi.service
-19. Активировать службу командой: sudo systemctl enable uwsgi.service
-20. Запустить службу командой: sudo systemctl start uwsgi.service 
-21. Проверить статус службы, что нет ошибок: sudo systemctl status uwsgi.service
-22. Проверить результат обращения на сервис /info по порту 5000, например: http://217.73.60.18:5000/info
-23. Для дополнительной проверки можно перезагрузить виртуальную машину через консоль управления облаком и убедиться, что после перезапуска сервис снова будет работать.
-24. Для дальнейшего создания эталонного образа машины необходимо выключить машину через консоль управления облаком.
-25. Сделать новый снимок жесткого диска машины, тег Name для снимка задать cpu bound.
-26. Создать новый образ с именем cpu bound используя снимок созданный на предыдущем шаге.
+16. Добавить службу в systemd командой: sudo ln -s /home/ec2-user/dev/croc/start_task_cpu_bound_app/gunicorn.service /etc/systemd/system/gunicorn.service
+17. Активировать службу командой: sudo systemctl enable gunicorn.service
+18. Запустить службу командой: sudo systemctl start gunicorn.service 
+19. Проверить статус службы, что нет ошибок: sudo systemctl status gunicorn.service
+20. Проверить результат обращения на сервис /info по порту 5000, например: http://217.73.60.18:5000/info
+21. Для дополнительной проверки можно перезагрузить виртуальную машину через консоль управления облаком и убедиться, что после перезапуска сервис снова будет работать.
+22. Для дальнейшего создания эталонного образа машины необходимо выключить машину через консоль управления облаком.
+23. Сделать новый снимок жесткого диска машины, тег Name для снимка задать cpu bound.
+24. Создать новый образ с именем cpu bound используя снимок созданный на предыдущем шаге.
 При создании образа установить в значение "Нет" флаг "Удалить с экземпляром".
-27. Создать новый шаблон запуска выбрав образ cpu bound созданный на предыдущем шаге.
+25. Создать новый шаблон запуска выбрав образ cpu bound созданный на предыдущем шаге.
 Тип машины: m5.large
 Имя шаблона запуска: cpu_bound
 Поставить галочку: Удалить в случае выключения
+26. На этом создание шаблона закончено. Шаблон будет использоваться в management приложении по имени тега.
